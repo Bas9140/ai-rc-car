@@ -93,7 +93,7 @@ export default function App() {
 
         {/* Rechterkolom: status + handmatig rijden */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <StatusPanel telemetry={telemetry} />
+          <StatusPanel telemetry={telemetry} wsStatus={connected ? 'connected' : 'disconnected'} />
           <ManualControls send={sendCmd} mode={mode} />
         </div>
 

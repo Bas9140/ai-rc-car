@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diagnose</title>
+  <style>
+    body { background:#0f172a; color:#e2e8f0; font-family:monospace; padding:20px; font-size:14px; }
+    h2 { color:#94a3b8; margin-bottom:16px; }
+    .row { margin:8px 0; padding:8px 12px; border-radius:6px; background:#1e293b; }
+    .ok  { color:#4ade80; }
+    .err { color:#f87171; }
+    .pending { color:#fbbf24; }
+    pre { margin-top:12px; font-size:11px; white-space:pre-wrap; word-break:break-all; }
+  </style>
+</head>
+<body>
+<h2>RC Car – Diagnose</h2>
+<div id="out"></div>
+<script>
+const out = document.getElementById('out')
+function log(msg, cls) {
+  const d = document.createElement('div')
+  d.className = 'row ' + (cls||'')
+  d.textContent = msg
+  out.appendChild(d)
+  return d
+}
+
+// 1. Basic JS
+log('✓ JavaScript werkt', 'ok')
+
+// 2. Fetch API
+;(async () => {
+  const r1 = log('⏳ Fetch /api/status...', 'pending')
+  try {
+    const res = await fetch('/api/status', {signal: AbortSignal.timeout(4000)})
+    const d   = await res.json()
+    r1.className = 'row ok'
+    r1.textContent = `✓ API OK – modus: ${d.mode}, GPS: ${d.latitude?.toFixed(4)??'–'}`
+  } catch(e) {
+    r1.className = 'row err'
+    r1.textContent = `✗ API fout: ${e.message}`
+  }
+
+  // 3. WebSocket
+  const r2 = log('⏳ WebSocket verbinden...', 'pending')
+  try {
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws'
+    const wsUrl = `${proto}://${location.host}/ws`
+    r2.textContent = `⏳ WebSocket: ${wsUrl}`
+    await new Promise((resolve, reject) => {
+      const ws = new WebSocket(wsUrl)
+      const t  = setTimeout(() => { ws.close(); reject(new Error('timeout')) }, 5000)
+      ws.onopen    = () => {
+        clearTimeout(t)
+        r2.className = 'row ok'
+        r2.textContent = `✓ WebSocket verbonden: ${wsUrl}`
+        setTimeout(() => ws.close(), 500)
+        resolve()
+      }
+      ws.onerror   = (e) => { clearTimeout(t); reject(new Error('connect error')) }
+      ws.onclose   = (e) => { if (e.code !== 1000) reject(new Error(`closed: code ${e.code}`)) }
+    })
+  } catch(e) {
+    r2.className = 'row err'
+    r2.textContent = `✗ WebSocket fout: ${e.message}`
+  }
+
+  // 4. JS bundle laden
+  const r3 = log('⏳ JS bundle bereikbaar?', 'pending')
+  try {
+    const links = Array.from(document.querySelectorAll('link[rel=stylesheet]'))
+    // Haal src van gebundelde JS op uit index.html
+    const res = await fetch('/', {signal: AbortSignal.timeout(3000)})
+    const txt = await res.text()
+    const m   = txt.match(/src="(\/assets\/index-[^"]+\.js)"/)
+    if (!m) throw new Error('geen bundle URL gevonden in index.html')
+    const jsUrl = m[1]
+    const j = await fetch(jsUrl, {signal: AbortSignal.timeout(5000)})
+    r3.className = 'row ok'
+    r3.textContent = `✓ JS bundle OK: ${jsUrl} (${Math.round(j.headers.get('content-length')/1024)||'?'} KB)`
+  } catch(e) {
+    r3.className = 'row err'
+    r3.textContent = `✗ JS bundle fout: ${e.message}`
+  }
+
+  // 5. User agent
+  log(`ℹ️ Browser: ${navigator.userAgent.slice(0,80)}`)
+
+  // 6. Try loading React app
+  log('─── Open nu https://rc-car.basvenema.win in HETZELFDE venster ───')
+})()
+</script>
+</body>
+</html>

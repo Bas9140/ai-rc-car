@@ -24,7 +24,7 @@ from typing import Optional
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, HTMLResponse
+from fastapi.responses import StreamingResponse, HTMLResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from .ros_bridge import RosBridge
@@ -134,8 +134,10 @@ async def websocket_endpoint(ws: WebSocket):
                     )
                 elif msg.get("type") == "ping":
                     await ws.send_text(json.dumps({"type": "pong"}))
-        except (WebSocketDisconnect, Exception):
+        except WebSocketDisconnect:
             pass
+        except Exception as exc:
+            print(f"[ws] receive_loop fout: {type(exc).__name__}: {exc}")
 
     async def send_loop():
         """Stuur telemetrie @ 10 Hz."""
@@ -148,8 +150,10 @@ async def websocket_endpoint(ws: WebSocket):
                     "data": {**state, "waypoints": wps},
                 }))
                 await asyncio.sleep(0.1)
-        except (WebSocketDisconnect, Exception):
+        except WebSocketDisconnect:
             pass
+        except Exception as exc:
+            print(f"[ws] send_loop fout: {type(exc).__name__}: {exc}")
 
     # Beide loops parallel, stop als een van de twee stopt
     await asyncio.gather(
@@ -166,6 +170,15 @@ async def websocket_endpoint(ws: WebSocket):
 async def video_stream():
     bridge = app.state.bridge
 
+    # Geen camera beschikbaar → direct 503, zodat de browser
+    # niet crasht op een ongeldige MJPEG stream (met name Safari iOS)
+    if bridge.get_latest_frame() is None:
+        return Response(
+            content=b"",
+            status_code=503,
+            headers={"Retry-After": "5"},
+        )
+
     async def generate():
         while True:
             frame = bridge.get_latest_frame()
@@ -176,10 +189,10 @@ async def video_stream():
                     + frame +
                     b"\r\n"
                 )
+                await asyncio.sleep(0.033)   # ~30 fps max
             else:
-                # Placeholder als geen camera beschikbaar
-                yield b"--frame\r\nContent-Type: image/jpeg\r\n\r\n\r\n"
-            await asyncio.sleep(0.033)   # ~30 fps max
+                # Camera tijdelijk niet beschikbaar, wacht even
+                await asyncio.sleep(0.1)
 
     return StreamingResponse(
         generate(),
@@ -188,6 +201,16 @@ async def video_stream():
 
 
 # ── Frontend ─────────────────────────────────────────────────────────────────
+
+# Expliciete root route met no-cache header (voorkomt Cloudflare edge caching
+# van index.html, zodat na een rebuild altijd de nieuwe JS-hash wordt geladen)
+if os.path.isfile(FRONTEND_INDEX):
+    @app.get("/")
+    async def serve_index():
+        return FileResponse(
+            FRONTEND_INDEX,
+            headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
+        )
 
 # Serveer React build als die bestaat
 if os.path.isdir(FRONTEND_DIST):

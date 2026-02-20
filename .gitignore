@@ -51,3 +51,7 @@ logs/
 *.o
 *.so
 *.a
+
+# Node.js
+node_modules/
+software/dashboard/frontend/dist/
