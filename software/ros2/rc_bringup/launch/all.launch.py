@@ -59,6 +59,13 @@ def generate_launch_description():
             ])
         ),
 
+        # ── Navigation (GPS waypoints + pure pursuit) ────────────────
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([pkg_bringup, 'launch', 'navigation.launch.py'])
+            ])
+        ),
+
         # ── Mission node ──────────────────────────────────────────────
         Node(
             package    = 'rc_mission',

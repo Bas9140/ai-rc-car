@@ -1,0 +1,95 @@
+# ekf_params.yaml
+# Configuratie voor robot_localization EKF node (optioneel – voor later).
+#
+# Het rc_navigation pakket heeft robot_localization NIET nodig voor
+# basisnavigatie; de navigation_node doet zelf sensor fusie.
+#
+# robot_localization geeft een /odom topic en TF (odom → base_link)
+# die Nav2 en rviz2 nodig hebben voor geavanceerde visualisatie.
+#
+# Installatie:
+#   sudo apt install ros-humble-robot-localization
+#
+# Gebruik:
+#   ros2 launch rc_bringup navigation.launch.py ekf:=true
+
+ekf_filter_node:
+  ros__parameters:
+
+    frequency:      30.0         # Filter update rate (Hz)
+    sensor_timeout:  0.1         # Timeout per sensor (s)
+    two_d_mode:      true        # Geen hoogte-estimatie (2D rijden)
+
+    publish_tf:      true
+    map_frame:       map
+    odom_frame:      odom
+    base_link_frame: base_link
+    world_frame:     odom
+
+    # ── GPS (via navsat_transform_node → /odometry/gps) ──────────────
+    # navsat_transform_node vertaalt NavSatFix → Odometry in ENU-frame
+    odom0: /odometry/gps
+    odom0_config:
+      # x  y  z
+      - [true,  true,  false]
+      # roll pitch yaw
+      - [false, false, false]
+      # vx vy vz
+      - [false, false, false]
+      # vroll vpitch vyaw
+      - [false, false, false]
+      # ax ay az
+      - [false, false, false]
+    odom0_differential: false
+    odom0_relative:     false
+    odom0_queue_size:   10
+
+    # ── IMU (oriëntatie + hoeksnelheid) ──────────────────────────────
+    imu0: /imu/data
+    imu0_config:
+      # x  y  z
+      - [false, false, false]
+      # roll pitch yaw (MPU-6050 heeft geen magnetometer → yaw niet)
+      - [false, false, false]
+      # vx vy vz
+      - [false, false, false]
+      # vroll vpitch vyaw
+      - [true,  true,  true]
+      # ax ay az
+      - [true,  true,  false]
+    imu0_differential:  false
+    imu0_relative:      false
+    imu0_queue_size:    10
+    imu0_remove_gravitational_acceleration: true
+
+    process_noise_covariance:
+      # x    y    z    roll  pitch yaw   vx   vy   vz   vroll vpitch vyaw  ax    ay    az
+      - [0.05, 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0]
+      - [0,    0.05, 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0]
+      - [0,    0,    0.06, 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0]
+      - [0,    0,    0,    0.03, 0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0]
+      - [0,    0,    0,    0,    0.03, 0,    0,    0,    0,    0,    0,    0,    0,    0,    0]
+      - [0,    0,    0,    0,    0,    0.06, 0,    0,    0,    0,    0,    0,    0,    0,    0]
+      - [0,    0,    0,    0,    0,    0,    0.025,0,    0,    0,    0,    0,    0,    0,    0]
+      - [0,    0,    0,    0,    0,    0,    0,    0.025,0,    0,    0,    0,    0,    0,    0]
+      - [0,    0,    0,    0,    0,    0,    0,    0,    0.04, 0,    0,    0,    0,    0,    0]
+      - [0,    0,    0,    0,    0,    0,    0,    0,    0,    0.01, 0,    0,    0,    0,    0]
+      - [0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0.01, 0,    0,    0,    0]
+      - [0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0.02, 0,    0,    0]
+      - [0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0.01, 0,    0]
+      - [0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0.01, 0]
+      - [0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0.015]
+
+# ── navsat_transform_node ─────────────────────────────────────────────────
+# Vertaalt NavSatFix → Odometry in lokaal ENU frame
+navsat_transform_node:
+  ros__parameters:
+    frequency:          30.0
+    delay:               3.0       # Wacht op EKF initialisatie
+    magnetic_declination_radians: 0.044   # NL: ~2.5° oost (2026)
+    yaw_offset:         0.0
+    zero_altitude:      true
+    publish_filtered_gps: true     # Publiceert /gps/filtered (NavSatFix)
+    use_odometry_yaw:   false      # Gebruik IMU yaw (niet GPS koers)
+    wait_for_datum:     false
+    broadcast_utm_transform: false

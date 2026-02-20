@@ -83,3 +83,17 @@ avoidance_node:
     max_angular:    1.2     # Maximale draaisnelheid (rad/s) bij uitwijken
     sensor_timeout: 0.8     # Maximale leeftijd van sensordata (s)
     publish_rate:   20.0    # Hz
+
+navigation_node:
+  ros__parameters:
+    lookahead_m:          2.5    # Pure pursuit blik-vooruit afstand (m)
+    max_linear:           0.5    # Maximale rijsnelheid (m/s)
+    min_linear:           0.1    # Minimale rijsnelheid bij nadering waypoint (m/s)
+    max_angular:          1.2    # Maximale draaisnelheid (rad/s)
+    slow_radius_m:        3.0    # Start remmen op X meter van waypoint
+    target_radius_m:      1.5    # Aankomstradius (m) – standaard per waypoint
+    gps_timeout_s:        2.0    # Stop navigatie na X s GPS-verlies
+    imu_alpha:            0.95   # IMU gewicht heading filter (0=GPS, 1=IMU)
+    min_speed_gps:        0.4    # Minimale GPS-snelheid voor koers-update (m/s)
+    set_origin_on_start:  true   # Gebruik eerste GPS-fix als nulpunt
+    publish_rate:         20.0   # Hz
