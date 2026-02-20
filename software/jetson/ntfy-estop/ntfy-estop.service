@@ -1,0 +1,29 @@
+[Unit]
+Description=RC Car ntfy Emergency Stop Listener
+After=network-online.target rc-car-dashboard.service
+Wants=network-online.target
+# Wacht op dashboard als die als service draait
+After=rc-car-dashboard.service
+
+[Service]
+Type=simple
+User=jetson
+WorkingDirectory=/opt/rc-car/ntfy-estop
+ExecStart=/usr/bin/python3 /opt/rc-car/ntfy-estop/ntfy_estop.py
+Restart=always
+RestartSec=10
+
+# Configuratie (pas aan voor jouw setup)
+Environment=NTFY_URL=https://ntfy.basvenema.win
+Environment=NTFY_TOPIC=rc-car
+Environment=NTFY_TOKEN=VERVANG_MET_JOUW_TOKEN
+Environment=DASHBOARD_URL=http://localhost:8080
+Environment=STATUS_TOPIC=Homelab
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=rc-car-ntfy-estop
+
+[Install]
+WantedBy=multi-user.target
