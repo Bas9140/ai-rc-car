@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RC Auto">
+  <title>RC Auto – Bediening</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: #020617;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding: env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px);
+      gap: 12px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+    }
+
+    h1 { font-size: 18px; font-weight: 700; }
+
+    #status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #475569;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    #status-dot.online  { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+    #status-dot.offline { background: #f87171; }
+
+    #status-bar {
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #94a3b8;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    #status-bar span { display: flex; flex-direction: column; gap: 2px; }
+    #status-bar strong { color: #e2e8f0; font-size: 15px; }
+
+    /* Noodstop – groot en rood */
+    #btn-stop {
+      background: #dc2626;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 28px;
+      width: 100%;
+      cursor: pointer;
+      box-shadow: 0 4px 24px rgba(220,38,38,0.5);
+      transition: transform .1s, background .1s;
+      flex-shrink: 0;
+    }
+    #btn-stop:active { transform: scale(.96); background: #b91c1c; }
+    #btn-stop.active { background: #7f1d1d; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 20px 10px;
+      cursor: pointer;
+      transition: background .1s, transform .1s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:active { transform: scale(.95); background: #334155; }
+    .btn .icon { font-size: 24px; }
+    .btn.green  { border-color: #16a34a; color: #4ade80; }
+    .btn.yellow { border-color: #ca8a04; color: #fbbf24; }
+    .btn.blue   { border-color: #2563eb; color: #60a5fa; }
+    .btn.purple { border-color: #7c3aed; color: #a78bfa; }
+
+    #feedback {
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #64748b;
+      min-height: 42px;
+      text-align: center;
+    }
+    #feedback.ok  { color: #4ade80; }
+    #feedback.err { color: #f87171; }
+
+    footer {
+      text-align: center;
+      color: #334155;
+      font-size: 11px;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🚗 RC Auto</h1>
+  <div><span id="status-dot"></span><span id="conn-label">verbinden...</span></div>
+</header>
+
+<div id="status-bar">
+  <span><small>Modus</small><strong id="s-mode">–</strong></span>
+  <span><small>Snelheid</small><strong id="s-speed">–</strong></span>
+  <span><small>Ontwijken</small><strong id="s-avoid">–</strong></span>
+  <span><small>Noodstop</small><strong id="s-estop">–</strong></span>
+</div>
+
+<button id="btn-stop" onclick="send('stop')">⛔ NOODSTOP</button>
+
+<div class="grid">
+  <button class="btn green"  onclick="send('nav-start')">
+    <span class="icon">▶️</span>Start nav
+  </button>
+  <button class="btn yellow" onclick="send('nav-pause')">
+    <span class="icon">⏸</span>Pauzeer
+  </button>
+  <button class="btn blue"   onclick="send('nav-resume')">
+    <span class="icon">▶▶</span>Hervat
+  </button>
+  <button class="btn purple" onclick="send('status')">
+    <span class="icon">📍</span>Status
+  </button>
+  <button class="btn"        onclick="send('mode-manual')">
+    <span class="icon">🕹</span>Handmatig
+  </button>
+  <button class="btn"        onclick="send('mode-auto')">
+    <span class="icon">🤖</span>Autonoom
+  </button>
+</div>
+
+<div id="feedback">Klaar voor gebruik</div>
+
+<footer>rc-car.basvenema.win – voeg toe aan thuisscherm voor snelle toegang</footer>
+
+<script>
+  const BASE = window.location.origin   // werkt op elk domein
+  const fb   = document.getElementById('feedback')
+  const dot  = document.getElementById('status-dot')
+  const connLabel = document.getElementById('conn-label')
+  const stopBtn   = document.getElementById('btn-stop')
+
+  function showFb(msg, type = '') {
+    fb.textContent = msg
+    fb.className = type
+    if (type) setTimeout(() => { fb.className = ''; fb.textContent = 'Klaar' }, 3000)
+  }
+
+  async function send(action) {
+    const endpoints = {
+      'stop':        ['POST', '/api/mission/stop',         null],
+      'nav-start':   ['POST', '/api/navigation/start',     null],
+      'nav-pause':   ['POST', '/api/navigation/pause',     null],
+      'nav-resume':  ['POST', '/api/navigation/resume',    null],
+      'status':      ['GET',  '/api/status',               null],
+      'mode-manual': ['POST', '/api/mission/mode',         {mode:'manual'}],
+      'mode-auto':   ['POST', '/api/mission/mode',         {mode:'autonomous'}],
+    }
+    const [method, path, body] = endpoints[action]
+
+    if (action === 'stop') {
+      stopBtn.classList.add('active')
+      setTimeout(() => stopBtn.classList.remove('active'), 1500)
+    }
+
+    showFb('Versturen...')
+    try {
+      const r = await fetch(BASE + path, {
+        method,
+        headers: body ? {'Content-Type': 'application/json'} : {},
+        body:    body ? JSON.stringify(body) : undefined,
+      })
+      if (!r.ok) throw new Error(`HTTP ${r.status}`)
+      const data = await r.json()
+
+      if (action === 'stop')
+        showFb('⛔ Noodstop verstuurd!', 'ok')
+      else if (action === 'status')
+        showFb(`Modus: ${data.mode} | GPS: ${data.latitude?.toFixed(4)??'–'},${data.longitude?.toFixed(4)??'–'}`, 'ok')
+      else
+        showFb(`✓ ${path.split('/').pop()} OK`, 'ok')
+    } catch(e) {
+      showFb(`⚠️ Fout: ${e.message}`, 'err')
+    }
+  }
+
+  // Status poller
+  async function pollStatus() {
+    try {
+      const r   = await fetch(BASE + '/api/status', {signal: AbortSignal.timeout(3000)})
+      const st  = await r.json()
+      dot.className = 'online'
+      connLabel.textContent = 'online'
+      document.getElementById('s-mode').textContent  = st.mode ?? '–'
+      document.getElementById('s-speed').textContent = st.speed_ms != null
+        ? st.speed_ms.toFixed(1) + ' m/s' : '–'
+      document.getElementById('s-avoid').textContent = st.avoidance_status ?? '–'
+      document.getElementById('s-estop').textContent = st.emergency_stop ? '🔴 JA' : '🟢 nee'
+    } catch {
+      dot.className = 'offline'
+      connLabel.textContent = 'offline'
+    }
+  }
+
+  pollStatus()
+  setInterval(pollStatus, 3000)
+</script>
+</body>
+</html>
