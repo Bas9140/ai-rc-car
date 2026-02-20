@@ -12,11 +12,16 @@ GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
 
 echo -e "${GREEN}=== AI RC Car Dashboard ===${NC}"
 
+# ── nvm laden als npm nog niet in PATH staat ─────────────────────────────
+if ! command -v npm &>/dev/null && [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+  source "$HOME/.nvm/nvm.sh"
+fi
+
 # ── 1. Frontend bouwen als dist ontbreekt of --build meegegeven ──────────
 if [[ "$1" == "--build" ]] || [[ ! -d "$DIST_DIR" ]]; then
   echo -e "${YELLOW}Frontend bouwen...${NC}"
   if ! command -v npm &>/dev/null; then
-    echo -e "${RED}npm niet gevonden. Installeer Node.js >= 18.${NC}"
+    echo -e "${RED}npm niet gevonden. Installeer Node.js >= 18 of nvm.${NC}"
     exit 1
   fi
   (cd "$FRONTEND_DIR" && npm install && npm run build)
