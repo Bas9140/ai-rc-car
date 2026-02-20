@@ -52,8 +52,9 @@ PORT="${DASHBOARD_PORT:-8080}"
 echo -e "${GREEN}Dashboard starten op http://${HOST}:${PORT}${NC}"
 echo -e "${GREEN}Druk Ctrl+C om te stoppen.${NC}"
 
-cd "$BACKEND_DIR"
-exec python3 -m uvicorn main:app \
+# Draai vanuit dashboard-root zodat 'backend' als package beschikbaar is
+cd "$SCRIPT_DIR"
+exec python3 -m uvicorn backend.main:app \
   --host "$HOST" \
   --port "$PORT" \
   --log-level info
