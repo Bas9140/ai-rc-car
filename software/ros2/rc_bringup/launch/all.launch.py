@@ -45,6 +45,13 @@ def generate_launch_description():
             ])
         ),
 
+        # ── Perception (OAK-D Lite + YOLO + tracking + depth) ────────
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([pkg_bringup, 'launch', 'perception.launch.py'])
+            ])
+        ),
+
         # ── Mission node ──────────────────────────────────────────────
         Node(
             package    = 'rc_mission',

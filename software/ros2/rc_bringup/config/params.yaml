@@ -51,3 +51,26 @@ receiver_node:
 
 mission_node:
   ros__parameters: {}
+
+oak_node:
+  ros__parameters:
+    model_name:        'yolov8n_coco_640x352'   # YOLOv8n, op Myriad X chip
+    shaves:            6                         # Aantal Myriad X shaves (max 6 op OAK-D Lite)
+    confidence:        0.45                      # Minimum detectie confidence
+    frame_id:          'oak_rgb_camera_optical_frame'
+    publish_annotated: true                      # Debug overlay topic
+
+tracking_node:
+  ros__parameters:
+    gain_angular:    1.8     # P-gain stuurcorrectie (hoger = scherper sturen)
+    gain_linear:     0.0004  # P-gain afstandsregeling (hoger = sneller reageren)
+    target_dist_mm:  1500.0  # Gewenste volgafstand (1.5 m)
+    max_linear:      0.4     # Maximale rijsnelheid bij volgen (m/s)
+    max_angular:     1.2     # Maximale draaisnelheid (rad/s)
+    lost_timeout:    1.5     # Stop na X seconden geen persoon gezien
+
+depth_node:
+  ros__parameters:
+    stop_dist_mm:  800.0     # Afstand (mm) waaronder rijstrook geblokkeerd
+    warn_dist_mm:  1500.0    # Afstand (mm) waaronder waarschuwing
+    publish_rate:  10.0      # Hz

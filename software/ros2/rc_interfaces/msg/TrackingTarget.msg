@@ -1,8 +1,17 @@
 std_msgs/Header header
-bool active
-int32 track_id
-float32 distance_m
-float32 angle_deg
-float32 bbox_center_x
-float32 bbox_center_y
-float32 bbox_width
+
+# Status van de actieve persoon-volgmodus (follow-me)
+bool    tracking       # True als er actief een target gevolgd wordt
+
+int32   class_id
+string  class_name
+float32 confidence
+
+# 3D positie van het target in mm (camera coordinaten)
+float32 x_mm
+float32 y_mm
+float32 z_mm
+
+# Horizontale offset in pixels ten opzichte van frame midden
+# Positief = target rechts van midden
+float32 x_offset_px
