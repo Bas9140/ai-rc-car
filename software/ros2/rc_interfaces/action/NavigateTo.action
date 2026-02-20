@@ -1,0 +1,11 @@
+float64 latitude
+float64 longitude
+float32 target_radius_m
+---
+bool success
+float32 distance_traveled_m
+float32 duration_s
+---
+float32 distance_remaining_m
+float32 current_speed_ms
+string status

@@ -1,0 +1,39 @@
+# AI RC Car – global parameters
+# Adjust to match your hardware wiring and setup.
+
+vehicle_node:
+  ros__parameters:
+    esc_pin:           12       # GPIO pin for ESC PWM (BCM numbering on RPi)
+    servo_pin:         13       # GPIO pin for servo PWM
+    max_linear_speed:  0.3      # m/s – start conservative, increase when confident
+    max_angular_speed: 1.0      # rad/s
+    servo_trim_us:     0        # Trim ±50 µs if car doesn't drive straight
+    watchdog_timeout:  0.5      # seconds without cmd → stop motors
+
+gps_node:
+  ros__parameters:
+    port:     '/dev/ttyUSB0'    # GPS serial port (check with: ls /dev/ttyUSB*)
+    baudrate: 9600
+    frame_id: 'gps_link'
+
+imu_node:
+  ros__parameters:
+    i2c_bus:  1
+    i2c_addr: 0x68              # 0x68 (AD0 low) or 0x69 (AD0 high)
+    frame_id: 'imu_link'
+    rate_hz:  100.0
+
+ultrasonic_node:
+  ros__parameters:
+    # Physical pin numbers (BOARD numbering)
+    trig_front: 11
+    echo_front: 13
+    trig_rear:  15
+    echo_rear:  16
+    trig_left:  18
+    echo_left:  22
+    trig_right: 29
+    echo_right: 31
+
+mission_node:
+  ros__parameters: {}

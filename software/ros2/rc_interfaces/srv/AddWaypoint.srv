@@ -1,0 +1,7 @@
+float64 latitude
+float64 longitude
+float32 target_radius_m
+---
+bool success
+int32 waypoint_id
+int32 total_waypoints
