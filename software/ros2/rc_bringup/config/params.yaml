@@ -74,3 +74,12 @@ depth_node:
     stop_dist_mm:  800.0     # Afstand (mm) waaronder rijstrook geblokkeerd
     warn_dist_mm:  1500.0    # Afstand (mm) waaronder waarschuwing
     publish_rate:  10.0      # Hz
+
+avoidance_node:
+  ros__parameters:
+    stop_dist_mm:   800.0   # Afstand (mm) GEBLOKKEERD  – moet overeenkomen met depth_node
+    warn_dist_mm:   1500.0  # Afstand (mm) WAARSCHUWING – moet overeenkomen met depth_node
+    max_linear:     0.4     # Maximale rijsnelheid (m/s) bij vrij pad
+    max_angular:    1.2     # Maximale draaisnelheid (rad/s) bij uitwijken
+    sensor_timeout: 0.8     # Maximale leeftijd van sensordata (s)
+    publish_rate:   20.0    # Hz

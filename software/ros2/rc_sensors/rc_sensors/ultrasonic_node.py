@@ -172,10 +172,6 @@ class UltrasonicNode(Node):
         msg.left_m  = self._sensors['left' ].measure_m()
         msg.right_m = self._sensors['right'].measure_m()
 
-        # Diagonals not available from ultrasonic; set to max
-        msg.front_left_m  = MAX_DIST_M
-        msg.front_right_m = MAX_DIST_M
-
         self._pub.publish(msg)
 
     def destroy_node(self):

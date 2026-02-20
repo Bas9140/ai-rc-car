@@ -52,6 +52,13 @@ def generate_launch_description():
             ])
         ),
 
+        # ── Avoidance (sensor fusie + uitwijklogica) ──────────────────
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([
+                PathJoinSubstitution([pkg_bringup, 'launch', 'avoidance.launch.py'])
+            ])
+        ),
+
         # ── Mission node ──────────────────────────────────────────────
         Node(
             package    = 'rc_mission',
