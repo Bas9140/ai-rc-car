@@ -22,6 +22,7 @@ setup(
             'gps_node        = rc_sensors.gps_node:main',
             'ultrasonic_node = rc_sensors.ultrasonic_node:main',
             'imu_node        = rc_sensors.imu_node:main',
+            'receiver_node   = rc_sensors.receiver_node:main',
         ],
     },
 )

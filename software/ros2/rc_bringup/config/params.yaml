@@ -35,5 +35,19 @@ ultrasonic_node:
     trig_right: 29
     echo_right: 31
 
+receiver_node:
+  ros__parameters:
+    port:              '/dev/ttyAMA0'   # RPi5 UART0 = GPIO 14/15, physical pin 8/10
+    baudrate:          115200
+    deadzone:          0.05             # 5% stick deadzone (eliminates drift)
+    max_linear_speed:  0.5              # m/s at full throttle (match vehicle_node)
+    max_angular_speed: 1.0             # rad/s at full steer
+
+    # Channel mapping (0-based, FS-GT5 defaults):
+    # CH1 (idx 0) = steering wheel
+    # CH2 (idx 1) = throttle trigger
+    # CH5 (idx 4) = SWA kill switch  → flip DOWN = STOP
+    # CH6 (idx 5) = SWB mode switch  → 3 positions = manual/follow_me/autonomous
+
 mission_node:
   ros__parameters: {}

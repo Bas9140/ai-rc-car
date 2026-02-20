@@ -43,4 +43,12 @@ def generate_launch_description():
             parameters = [params],
             output     = 'screen',
         ),
+        Node(
+            package    = 'rc_sensors',
+            executable = 'receiver_node',
+            name       = 'receiver_node',
+            parameters = [params],
+            output     = 'screen',
+            emulate_tty = True,
+        ),
     ])
