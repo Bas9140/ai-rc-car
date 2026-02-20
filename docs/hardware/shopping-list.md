@@ -4,16 +4,19 @@ Laatste update: 2026-02-20
 
 > **Belangrijk**: De originele NVIDIA Jetson Nano 4GB is **End-of-Life** (EOL).
 > Twee brain-opties uitgewerkt: aangeraden (Jetson Orin Nano Super) en budget (Raspberry Pi 5).
+>
+> **Camera update**: Intel RealSense D435i is slecht leverbaar.
+> Vervangen door **Luxonis OAK-D Lite** – goedkoper én heeft ingebouwde AI-chip (YOLO draait op de camera zelf).
 
 ---
 
-## Optie A – Aangeraden setup (~€995)
+## Optie A – Aangeraden setup (~€915)
 
 | # | Component | Model | Prijs | Winkel | Link |
 |---|---|---|---|---|---|
 | 1 | **Chassis** | ARRMA Granite 4x4 3S BLX V3 RTR | ~€300 | TopRC.nl | [toprc.nl](https://www.toprc.nl/arrma-granite-4x4-3s-blx-v3-groen.html) |
 | 2 | **AI Brein** | NVIDIA Jetson Orin Nano Super Dev Kit | €274.95 | Antratek.nl | [antratek.nl](https://www.antratek.nl/nvidia-jetson-orin-nano-super-developer-kit) |
-| 3 | **Dieptecamera** | Intel RealSense D435i | €224.00 | Beat-IT.nl | [beat-it.nl](https://www.beat-it.nl/intel-82635d435idk5p) |
+| 3 | **Dieptecamera** | Luxonis OAK-D Lite *(vervangt RealSense)* | €143.75 | Opencircuit.shop | [opencircuit.shop](https://opencircuit.shop/product/luxonis-oak-d-lite) |
 | 4 | **GPS module** | Holybro M8N GPS (met kompas) | ~€48 | Holybro Store | [holybro.com](https://holybro.com/products/m8n-gps) |
 | 5 | **IMU** | GY-521 MPU-6050 (accel + gyro) | €2.55 | Opencircuit | [opencircuit.shop](https://opencircuit.shop/product/6-dof-gyroscope-accelerometer-module-gy-521) |
 | 6 | **Ultrasoon x4** | HC-SR04 (4 stuks) | €8.60 (4x €2.15) | Opencircuit | [opencircuit.shop](https://opencircuit.shop/product/hc-sr04-ultrasonic-distance-detection-module) |
@@ -76,13 +79,21 @@ Minder AI-rekenkracht, maar voldoende voor YOLO v8n (nano model) en ROS2.
 
 ---
 
-### 3. Dieptecamera – Intel RealSense D435i
-- **Waarom**: Stereo dieptecamera + RGB + ingebouwde IMU (D435**i**)
-- **Bereik**: 0.2m – 10m, **resolutie**: 1280x720 depth @ 30fps
+### 3. Dieptecamera – Luxonis OAK-D Lite *(aanbevolen alternatief voor RealSense)*
+
+> De Intel RealSense D435i is slecht/niet leverbaar. De OAK-D Lite is het betere alternatief.
+
+- **Waarom beter**: Ingebouwde **Myriad X AI chip (4 TOPS)** → YOLO draait direct OP de camera
+  - Ontlast de Raspberry Pi 5 enorm: RPi hoeft geen AI inference te doen
+  - Met RPi 5 + OAK-D Lite heb je genoeg kracht voor het hele project
+- **Stereo diepte**: actieve stereo, bereik 40cm – 8m
+- **RGB camera**: 12MP (fixed focus variant)
 - **Interface**: USB 3.0 (type-C)
-- **Software**: Officiële ROS2 driver beschikbaar (`realsense2_camera` package)
-- **NL kopen**: [Beat-IT.nl](https://www.beat-it.nl/intel-82635d435idk5p) – €224.00
-- **NL kopen**: [MaxICT.nl](https://maxict.nl/intel-realsense-d435i-camera-zilver-p10141009.html)
+- **Software**: `depthai` Python SDK + officiële ROS2 driver (`depthai-ros`)
+- **NL kopen**: [Opencircuit.shop](https://opencircuit.shop/product/luxonis-oak-d-lite) – **€143.75** ✅ op voorraad
+- **Officieel**: [Luxonis shop](https://shop.luxonis.com/products/oak-d-lite-1) – $149 (pre-order, langere levertijd)
+
+**Upgrade optie**: OAK-D (standaard, grotere sensor) bij [Antratek.nl](https://www.antratek.nl) – €241.94
 
 ---
 
@@ -152,7 +163,7 @@ Minder AI-rekenkracht, maar voldoende voor YOLO v8n (nano model) en ROS2.
 |---|---|
 | Chassis (Arrma Granite 3S BLX V3) | ~€300 |
 | AI Brein (Jetson Orin Nano Super) | €275 |
-| Dieptecamera (RealSense D435i) | €224 |
+| Dieptecamera (OAK-D Lite) | €144 |
 | GPS (Holybro M8N) | €48 |
 | IMU (MPU-6050) | €3 |
 | Ultrasoon x4 (HC-SR04) | €9 |
@@ -161,17 +172,20 @@ Minder AI-rekenkracht, maar voldoende voor YOLO v8n (nano model) en ROS2.
 | Voeding Jetson (powerbank 19V) | €50 |
 | UBEC + bedrading | €20 |
 | Behuizing (filament + hardware) | €15 |
-| **Totaal** | **~€1017** |
+| **Totaal** | **~€937** |
 
-> Besparen: gebruik een tweedehands Arrma chassis van Marktplaats (€100-150) → totaal ~€800
+> Besparen: gebruik een tweedehands Arrma chassis van Marktplaats (€100-150) → totaal ~€720
 
-### Optie B (Raspberry Pi 5 8GB) – ~€830
+### Optie B (Raspberry Pi 5 8GB) – ~€750
 
 | Categorie | Bedrag |
 |---|---|
-| Chassis + overige componenten | ~€740 |
+| Chassis + overige componenten | ~€660 |
 | Raspberry Pi 5 8GB | €90 |
-| **Totaal** | **~€830** |
+| **Totaal** | **~€750** |
+
+> Met de OAK-D Lite is de RPi 5 meer dan voldoende: YOLO draait op de camera zelf (Myriad X chip).
+> De RPi 5 hoeft alleen navigatie, avoidance en dashboard te draaien.
 
 ---
 
