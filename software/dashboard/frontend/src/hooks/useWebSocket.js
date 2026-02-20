@@ -10,12 +10,15 @@ const RECONNECT_MS = 2000
  *   telemetry  – laatste status payload van de backend
  *   send(msg)  – stuur JSON object naar backend
  */
-export function useWebSocket() {
+export function useWebSocket({ onMessage } = {}) {
   const wsRef      = useRef(null)
   const timerRef   = useRef(null)
+  const onMsgRef   = useRef(onMessage)
 
-  const [wsStatus,  setWsStatus]  = useState('connecting')
-  const [telemetry, setTelemetry] = useState(null)
+  const [connected, setConnected] = useState(false)
+
+  // Altijd de laatste onMessage callback bijhouden zonder reconnect te triggeren
+  useEffect(() => { onMsgRef.current = onMessage }, [onMessage])
 
   const connect = useCallback(() => {
     const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
@@ -24,7 +27,7 @@ export function useWebSocket() {
     wsRef.current = ws
 
     ws.onopen = () => {
-      setWsStatus('connected')
+      setConnected(true)
       clearTimeout(timerRef.current)
       // Ping elke 30s om verbinding levend te houden
       timerRef.current = setInterval(() => {
@@ -37,15 +40,12 @@ export function useWebSocket() {
     ws.onmessage = (evt) => {
       try {
         const msg = JSON.parse(evt.data)
-        if (msg.type === 'status') {
-          setTelemetry(msg.data)
-        }
-        // detections worden ook in telemetry.detections opgenomen
+        onMsgRef.current?.(msg)
       } catch (_) {}
     }
 
     ws.onclose = () => {
-      setWsStatus('disconnected')
+      setConnected(false)
       clearInterval(timerRef.current)
       timerRef.current = setTimeout(connect, RECONNECT_MS)
     }
@@ -68,5 +68,5 @@ export function useWebSocket() {
     }
   }, [])
 
-  return { wsStatus, telemetry, send }
+  return { connected, send }
 }
